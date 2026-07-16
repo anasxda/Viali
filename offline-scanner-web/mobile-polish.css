@@ -1,0 +1,17 @@
+/* Shared spacing and touch sizing for the complete iPhone interface. */
+:root{--page-x:16px;--control-h:48px}
+header{min-height:76px;height:auto;padding-top:max(10px,env(safe-area-inset-top));padding-bottom:10px}header>div{min-width:0}header h1{line-height:1.18;overflow-wrap:anywhere}.company-logo{width:42px;height:42px}.offline{flex:none;white-space:nowrap}
+main{padding:18px var(--page-x) calc(88px + env(safe-area-inset-bottom))}.page>h2{margin-bottom:18px}.card,.item,.row{margin-bottom:12px}.kpis{gap:10px;margin-bottom:14px}.kpis article{min-height:77px}
+button,.upload{touch-action:manipulation}.primary,.secondary,.danger{min-height:var(--control-h);padding-inline:16px}.small{min-height:42px}.full{margin-top:10px}.inline{align-items:stretch}.inline>button{min-width:74px}
+.search,input,select,textarea{min-height:46px}.search{margin-bottom:0}.suggest-wrap:has(>.search){margin-bottom:16px}
+#inventory>.title{margin-bottom:14px!important;align-items:center}#inventory>#items{padding-top:0}#add-item{min-width:88px!important;margin-left:14px;flex:none}
+.item{min-height:70px}.item>div,.row>div{min-width:0}.item b,.item small,.row b,.row small{overflow-wrap:anywhere}.item strong,.row strong{flex:none}
+.feature-grid{gap:10px!important;margin-bottom:18px!important}.feature-grid .card{min-height:106px!important;padding:14px!important;margin:0!important}.feature-grid b{font-size:14px!important;line-height:1.25}.feature-grid small{line-height:1.3}#settings>.card{padding:16px}#settings>.card p{line-height:1.5;margin:0 0 14px}
+nav{padding-bottom:max(env(safe-area-inset-bottom),4px)}nav button{height:64px;min-width:0;padding:7px 2px 4px}nav span{line-height:1.1}
+dialog{width:min(calc(100vw - 24px),600px);max-height:calc(100dvh - 24px);margin:auto;border-radius:18px;overflow:hidden}dialog form,#detail,#feature{padding:18px!important;max-height:calc(100dvh - 24px);overflow:auto;-webkit-overflow-scrolling:touch}
+dialog .title{align-items:flex-start;gap:12px}dialog .title h2{font-size:21px;line-height:1.2;overflow-wrap:anywhere}dialog .title .link{min-height:40px;padding:0 4px;flex:none}dialog label{margin-top:14px}dialog textarea{min-height:82px;resize:vertical}#item-form>.primary:last-child{width:100%;margin-top:18px}
+#detail>p,#feature>p{line-height:1.5}.stock{margin:18px 0}.suggest-panel{max-height:min(310px,38dvh);overflow:auto;-webkit-overflow-scrolling:touch}.suggest-option{min-height:60px;padding:11px 10px}
+#feature-dialog{width:min(calc(100vw - 24px),560px)!important;max-height:calc(100dvh - 24px)!important}#feature>.title{top:-18px!important;margin-bottom:4px;padding:18px 0 12px!important}#feature .row{padding:13px 10px!important;gap:10px}#feature .card{padding:14px}#camera-wrap{margin-bottom:14px}
+@media(max-width:430px){header{padding-inline:var(--page-x)}header h1{max-width:190px;font-size:14px}.offline{font-size:8px}main{padding-top:16px}.card,.item,.row{padding:14px}.two{gap:10px}}
+@media(max-width:390px){:root{--page-x:14px}.company-logo{width:38px;height:38px}header{gap:9px}header h1{max-width:170px;font-size:13px}.two{grid-template-columns:1fr}dialog form,#detail,#feature{padding:16px!important}#feature>.title{top:-16px!important;padding-top:16px!important}.feature-grid{gap:8px!important}}
+@media(max-width:340px){.feature-grid{grid-template-columns:1fr}}
