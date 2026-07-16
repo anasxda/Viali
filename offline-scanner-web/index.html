@@ -1,48 +1,12 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <meta name="theme-color" content="#071f2b" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="VIALI Scan" />
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="./icon.svg" />
-    <title>VIALI Offline Scanner</title>
-  </head>
-  <body>
-    <main class="shell">
-      <header>
-        <div class="mark">▦</div>
-        <div><small>VIALI HOME</small><h1>Offline Scanner</h1><p>Private on-device trial</p></div>
-      </header>
-
-      <section class="card scanner">
-        <div id="camera-wrap" hidden>
-          <video id="video" playsinline muted></video>
-          <div class="target"><span></span></div>
-          <p class="camera-help">Hold a barcode inside the frame</p>
-        </div>
-        <button id="scan" class="primary">Open camera scanner</button>
-        <button id="stop" class="secondary" hidden>Stop camera</button>
-        <p id="status" class="status" role="status">Ready to scan. No data is sent anywhere.</p>
-        <form id="manual-form">
-          <input id="manual" autocomplete="off" autocapitalize="off" placeholder="Or enter a barcode" aria-label="Barcode" />
-          <button class="secondary" type="submit">Add</button>
-        </form>
-      </section>
-
-      <section id="result" class="card result" hidden>
-        <div class="check">✓</div><div><small>LAST SCAN</small><strong id="last-code"></strong></div>
-      </section>
-
-      <section class="card history-card">
-        <div class="section-title"><h2>Scan history</h2><button id="clear" class="text-button" hidden>Clear</button></div>
-        <p id="empty">Scanned codes will stay here on this iPhone.</p>
-        <div id="history"></div>
-      </section>
-    </main>
-    <script type="module" src="/src.ts"></script>
-  </body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071f2b"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="VIALI Home"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon.svg"><title>VIALI Home Offline</title></head><body>
+<header><div class="logo">V</div><div><small>VIALI HOME</small><h1>Offline Inventory</h1></div><span class="offline">● OFFLINE</span></header>
+<main>
+ <section id="dashboard" class="page active"><h2>Dashboard</h2><div class="kpis"><article><small>ITEMS</small><b id="k-items">0</b></article><article><small>TOTAL STOCK</small><b id="k-stock">0</b></article><article><small>LOW STOCK</small><b id="k-low">0</b></article><article><small>MOVEMENTS</small><b id="k-moves">0</b></article></div><div class="card"><h3>Quick actions</h3><button class="primary open-scan">Scan barcode</button><div class="two"><button class="secondary" data-go="inventory">View inventory</button><button class="secondary" data-go="movements">Movement history</button></div></div><div class="card"><h3>Recent activity</h3><div id="recent"></div></div></section>
+ <section id="scan-page" class="page"><h2>Scan barcode</h2><div class="card"><div id="camera-wrap" hidden><video id="video" playsinline muted></video><div class="target"><span></span></div></div><button id="scan" class="primary">Open camera scanner</button><button id="stop" class="secondary full" hidden>Stop camera</button><p id="status">New barcodes open the item registration form.</p><form id="manual-form" class="inline"><input id="manual" placeholder="Or enter barcode" autocomplete="off"><button class="secondary">Use code</button></form></div></section>
+ <section id="inventory" class="page"><div class="title"><h2>Inventory</h2><button id="add-item" class="primary small">+ Add</button></div><input id="search" class="search" placeholder="Search item, barcode or location"><div id="items"></div></section>
+ <section id="movements" class="page"><h2>Movement history</h2><div id="moves"></div></section>
+ <section id="settings" class="page"><h2>Offline data</h2><div class="card"><p>This device keeps its own inventory. Team devices do not synchronize yet.</p><button id="export" class="secondary full">Export backup</button><label class="secondary full upload">Import backup<input id="import" type="file" accept="application/json" hidden></label><button id="erase" class="danger full">Erase this device's data</button></div></section>
+</main>
+<nav><button data-go="dashboard" class="active">⌂<span>Home</span></button><button data-go="scan-page">▦<span>Scan</span></button><button data-go="inventory">▤<span>Inventory</span></button><button data-go="movements">↕<span>History</span></button><button data-go="settings">⚙<span>Data</span></button></nav>
+<dialog id="item-dialog"><form id="item-form"><div class="title"><h2 id="form-title">Register item</h2><button type="button" class="link close">Cancel</button></div><label>Barcode *<input name="barcode" required></label><label>Item name *<input name="name" required></label><div class="two"><label>Hazard class<select name="hazard"><option>Non-hazardous</option><option>Flammable</option><option>Corrosive</option><option>Toxic</option><option>Oxidizing</option><option>Compressed gas</option><option>Environmental hazard</option><option>Other</option></select></label><label>Category<input name="category"></label></div><div class="two"><label>Opening quantity *<input name="quantity" type="number" min="0" step="any" required></label><label>Unit<select name="unit"><option>pcs</option><option>kg</option><option>g</option><option>L</option><option>mL</option><option>box</option></select></label></div><div class="two"><label>Location<input name="location"></label><label>Supplier<input name="supplier"></label></div><div class="two"><label>Batch number<input name="batch"></label><label>Expiry date<input name="expiry" type="date"></label></div><label>Remarks<textarea name="remarks"></textarea></label><button class="primary">Save item</button></form></dialog>
+<dialog id="detail-dialog"><div id="detail"></div></dialog><script type="module" src="/src.ts"></script></body></html>

@@ -1,92 +1,12 @@
-import { BrowserMultiFormatReader, type IScannerControls } from '@zxing/browser';
-import './style.css';
-
-type Scan = { code: string; date: string };
-const key = 'viali-offline-scan-history-v1';
-const video = document.querySelector<HTMLVideoElement>('#video')!;
-const scanButton = document.querySelector<HTMLButtonElement>('#scan')!;
-const stopButton = document.querySelector<HTMLButtonElement>('#stop')!;
-const cameraWrap = document.querySelector<HTMLElement>('#camera-wrap')!;
-const status = document.querySelector<HTMLElement>('#status')!;
-const history = document.querySelector<HTMLElement>('#history')!;
-const empty = document.querySelector<HTMLElement>('#empty')!;
-const clear = document.querySelector<HTMLButtonElement>('#clear')!;
-const result = document.querySelector<HTMLElement>('#result')!;
-const lastCode = document.querySelector<HTMLElement>('#last-code')!;
-let controls: IScannerControls | undefined;
-let locked = false;
-
-const load = (): Scan[] => {
-  try { return JSON.parse(localStorage.getItem(key) || '[]') as Scan[]; }
-  catch { return []; }
-};
-
-const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[c]!);
-
-function render() {
-  const scans = load();
-  empty.hidden = scans.length > 0;
-  clear.hidden = scans.length === 0;
-  history.innerHTML = scans.map(item => `<div class="row"><span class="barcode">▥</span><div><strong>${escapeHtml(item.code)}</strong><small>${new Date(item.date).toLocaleString()}</small></div></div>`).join('');
-}
-
-function saveCode(raw: string) {
-  const code = raw.trim();
-  if (!code) return;
-  const scans = load();
-  scans.unshift({ code, date: new Date().toISOString() });
-  localStorage.setItem(key, JSON.stringify(scans.slice(0, 100)));
-  lastCode.textContent = code;
-  result.hidden = false;
-  status.textContent = `Scanned ${code}`;
-  navigator.vibrate?.(100);
-  render();
-}
-
-function stopCamera() {
-  controls?.stop();
-  controls = undefined;
-  video.srcObject = null;
-  cameraWrap.hidden = true;
-  stopButton.hidden = true;
-  scanButton.hidden = false;
-  locked = false;
-}
-
-scanButton.addEventListener('click', async () => {
-  status.textContent = 'Starting camera…';
-  scanButton.disabled = true;
-  try {
-    const reader = new BrowserMultiFormatReader(undefined, { delayBetweenScanAttempts: 120 });
-    controls = await reader.decodeFromConstraints(
-      { audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } } },
-      video,
-      (scanResult) => {
-        if (!scanResult || locked) return;
-        locked = true;
-        saveCode(scanResult.getText());
-        window.setTimeout(stopCamera, 350);
-      }
-    );
-    cameraWrap.hidden = false;
-    stopButton.hidden = false;
-    scanButton.hidden = true;
-    status.textContent = 'Camera is active — point it at a barcode.';
-  } catch (error) {
-    console.error(error);
-    status.textContent = 'Camera could not start. Allow camera access in Safari Settings and try again.';
-  } finally { scanButton.disabled = false; }
-});
-
-stopButton.addEventListener('click', () => { stopCamera(); status.textContent = 'Camera stopped.'; });
-document.querySelector<HTMLFormElement>('#manual-form')!.addEventListener('submit', event => {
-  event.preventDefault();
-  const input = document.querySelector<HTMLInputElement>('#manual')!;
-  saveCode(input.value);
-  input.value = '';
-});
-clear.addEventListener('click', () => { localStorage.removeItem(key); result.hidden = true; render(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) stopCamera(); });
-
-render();
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+import {BrowserMultiFormatReader,type IScannerControls} from '@zxing/browser';import './style.css';
+type Item={id:string;barcode:string;name:string;hazard:string;category:string;quantity:number;unit:string;location:string;supplier:string;batch:string;expiry:string;remarks:string;updated:string};type Move={id:string;itemId:string;name:string;type:'Received'|'Issued'|'Opening';qty:number;date:string};type DB={items:Item[];moves:Move[]};
+const KEY='viali-full-offline-v1';let db:DB=JSON.parse(localStorage.getItem(KEY)||'{"items":[],"moves":[]}');let controls:IScannerControls|undefined,locked=false;const q=<T extends Element>(s:string)=>document.querySelector<T>(s)!;const esc=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));const save=()=>{localStorage.setItem(KEY,JSON.stringify(db));render()};
+function go(id:string){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',(x as HTMLElement).dataset.go===id));window.scrollTo(0,0)}document.querySelectorAll('[data-go]').forEach(x=>x.addEventListener('click',()=>go((x as HTMLElement).dataset.go!)));
+function render(){q('#k-items').textContent=String(db.items.length);q('#k-stock').textContent=String(db.items.reduce((a,i)=>a+i.quantity,0));q('#k-low').textContent=String(db.items.filter(i=>i.quantity<=2).length);q('#k-moves').textContent=String(db.moves.length);const rows=(arr:Move[])=>arr.length?arr.map(m=>`<article class="row"><div><b>${esc(m.name)}</b><small>${m.type} · ${new Date(m.date).toLocaleString()}</small></div><strong class="${m.type==='Issued'?'out':'in'}">${m.type==='Issued'?'-':'+'}${m.qty}</strong></article>`).join(''):'<p class="empty">No activity yet.</p>';q('#recent').innerHTML=rows(db.moves.slice(0,5));q('#moves').innerHTML=rows(db.moves);renderItems()}
+function renderItems(){const term=q<HTMLInputElement>('#search').value.toLowerCase();const list=db.items.filter(i=>[i.name,i.barcode,i.location].join(' ').toLowerCase().includes(term));q('#items').innerHTML=list.length?list.map(i=>`<button class="item" data-item="${i.id}"><div><b>${esc(i.name)}</b><small>${esc(i.barcode)} · ${esc(i.hazard)} · ${esc(i.location||'No location')}</small></div><strong>${i.quantity} ${esc(i.unit)}</strong></button>`).join(''):'<div class="card empty">No inventory items found.</div>';document.querySelectorAll('[data-item]').forEach(x=>x.addEventListener('click',()=>showItem((x as HTMLElement).dataset.item!)))}q('#search').addEventListener('input',renderItems);
+const itemDialog=q<HTMLDialogElement>('#item-dialog'),form=q<HTMLFormElement>('#item-form');function register(barcode=''){form.reset();(form.elements.namedItem('barcode') as HTMLInputElement).value=barcode;q('#form-title').textContent='Register item';itemDialog.showModal()}q('#add-item').addEventListener('click',()=>register());q('.close').addEventListener('click',()=>itemDialog.close());
+form.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(form),item:Item={id:crypto.randomUUID(),barcode:String(f.get('barcode')).trim(),name:String(f.get('name')).trim(),hazard:String(f.get('hazard')),category:String(f.get('category')),quantity:Number(f.get('quantity')),unit:String(f.get('unit')),location:String(f.get('location')),supplier:String(f.get('supplier')),batch:String(f.get('batch')),expiry:String(f.get('expiry')),remarks:String(f.get('remarks')),updated:new Date().toISOString()};if(db.items.some(i=>i.barcode.toLowerCase()===item.barcode.toLowerCase()))return alert('This barcode is already registered.');db.items.unshift(item);db.moves.unshift({id:crypto.randomUUID(),itemId:item.id,name:item.name,type:'Opening',qty:item.quantity,date:new Date().toISOString()});save();itemDialog.close();go('inventory')});
+function showItem(id:string){const i=db.items.find(x=>x.id===id);if(!i)return;const d=q<HTMLDialogElement>('#detail-dialog');q('#detail').innerHTML=`<div class="title"><div><small>${esc(i.barcode)}</small><h2>${esc(i.name)}</h2></div><button class="link" id="close-detail">Close</button></div><div class="stock">${i.quantity} <small>${esc(i.unit)} available</small></div><p>${esc(i.hazard)} · ${esc(i.category||'Uncategorized')} · ${esc(i.location||'No location')}</p><div class="two"><button class="primary" id="receive">Receive stock</button><button class="secondary" id="issue">Issue stock</button></div>`;d.showModal();q('#close-detail').addEventListener('click',()=>d.close());(['receive','issue'] as const).forEach(action=>q('#'+action).addEventListener('click',()=>{const raw=prompt(`${action==='receive'?'Quantity received':'Quantity issued'} (${i.unit})`);if(raw===null)return;const n=Number(raw);if(!n||n<0)return alert('Enter a valid quantity.');if(action==='issue'&&n>i.quantity)return alert('Not enough stock.');i.quantity+=action==='receive'?n:-n;i.updated=new Date().toISOString();db.moves.unshift({id:crypto.randomUUID(),itemId:i.id,name:i.name,type:action==='receive'?'Received':'Issued',qty:n,date:new Date().toISOString()});save();d.close()}))}
+function handleCode(code:string){code=code.trim();if(!code)return;const item=db.items.find(i=>i.barcode.toLowerCase()===code.toLowerCase());navigator.vibrate?.(100);stop();if(item)showItem(item.id);else register(code)}
+const video=q<HTMLVideoElement>('#video'),scan=q<HTMLButtonElement>('#scan'),stopBtn=q<HTMLButtonElement>('#stop'),wrap=q<HTMLElement>('#camera-wrap'),status=q('#status');async function start(){scan.setAttribute('disabled','');status.textContent='Starting camera…';try{const reader=new BrowserMultiFormatReader(undefined,{delayBetweenScanAttempts:120});controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'}}},video,r=>{if(r&&!locked){locked=true;handleCode(r.getText())}});wrap.hidden=false;scan.hidden=true;stopBtn.hidden=false;status.textContent='Point the camera at a barcode.'}catch{status.textContent='Camera unavailable. Allow camera access in Safari Settings.'}finally{scan.removeAttribute('disabled')}}function stop(){controls?.stop();controls=undefined;video.srcObject=null;wrap.hidden=true;scan.hidden=false;stopBtn.hidden=true;locked=false}scan.addEventListener('click',start);document.querySelectorAll('.open-scan').forEach(x=>x.addEventListener('click',()=>{go('scan-page');start()}));stopBtn.addEventListener('click',stop);q<HTMLFormElement>('#manual-form').addEventListener('submit',e=>{e.preventDefault();handleCode(q<HTMLInputElement>('#manual').value);q<HTMLInputElement>('#manual').value=''});
+q('#export').addEventListener('click',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download=`viali-backup-${new Date().toISOString().slice(0,10)}.json`;a.click()});q<HTMLInputElement>('#import').addEventListener('change',async e=>{const file=(e.target as HTMLInputElement).files?.[0];if(!file)return;try{db=JSON.parse(await file.text());save();alert('Backup imported.')}catch{alert('Invalid backup file.')}});q('#erase').addEventListener('click',()=>{if(confirm('Erase all offline inventory on this device?')){db={items:[],moves:[]};save()}});document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});render();if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));

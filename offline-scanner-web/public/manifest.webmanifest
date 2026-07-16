@@ -1,6 +1,6 @@
 {
-  "name": "VIALI Offline Scanner",
-  "short_name": "VIALI Scan",
+  "name": "VIALI Home Offline Inventory",
+  "short_name": "VIALI Home",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#edf4f5",
