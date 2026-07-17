@@ -55,7 +55,7 @@ if (fs.existsSync(clientDist)) {
     });
 }
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     const url = `http://localhost:${PORT}`;
     console.log(`VIALI Home server running at ${url}`);
 
@@ -66,4 +66,20 @@ app.listen(PORT, () => {
     if (process.platform === 'win32' && !process.env.NO_BROWSER) {
         spawn('explorer.exe', [url], { detached: true, stdio: 'ignore' }).unref();
     }
+});
+
+server.on('error', (error) => {
+    if (error && error.code === 'EADDRINUSE') {
+        const url = `http://localhost:${PORT}`;
+        console.log('');
+        console.log(`VIALI Home is already running at ${url}`);
+        console.log('Opening the existing application instead of starting a second copy.');
+        if (process.platform === 'win32' && !process.env.NO_BROWSER) {
+            spawn('explorer.exe', [url], { detached: true, stdio: 'ignore' }).unref();
+        }
+        process.exitCode = 0;
+        return;
+    }
+    console.error('Could not start VIALI Home:', error?.message || error);
+    process.exitCode = 1;
 });
