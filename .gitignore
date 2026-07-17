@@ -1,4 +1,6 @@
 **/node_modules/
 **/dist/
+desktop-app/data/
+desktop-app/data-export/
 *.log
 .DS_Store
